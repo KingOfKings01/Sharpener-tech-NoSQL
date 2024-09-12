@@ -8,6 +8,7 @@ export const createProduct = async (req, res) => {
 
     const result = await product.save();
 
+    // res.redirect('/admin/products');
     res.status(201).json(result);
   } catch (err) {
     res.status(500).json({ message: err.message });
