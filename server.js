@@ -11,6 +11,7 @@ import shopRoutes from './routes/shop.js'
 //* __dirname don't work in ES6 so we have to get it this way.
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
+import User from "./models/user.js"
 
 const app = express()
 
@@ -26,6 +27,15 @@ app.use(express.static(join(__dirname,"public")))
 
 // To parse application/json data
 app.use(bodyParser.json())
+
+app.use((req, res, next) => {
+    User.findById('66e361bf667fdcb21585244d')
+      .then(user => {
+        req.user = user;
+        next();
+      })
+      .catch(err => console.log(err));
+  });
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
