@@ -3,7 +3,7 @@ import Product from "../models/product.js";
 export const getProducts = async (req, res) => {
   try {
     const products = await Product.findAll();
-    
+
     res.render("shop/product-list", {
       prods: products,
       pageTitle: "All Products",
@@ -44,30 +44,26 @@ export const getIndex = (req, res) => {
     });
 };
 
-export const getCart = (req, res) => {
-  req.user
-    .getCart()
-    .then((cart) => {
-      return cart
-        .getProducts()
-        .then((products) => {
-          res.render("shop/cart", {
-            path: "/cart",
-            pageTitle: "Your Cart",
-            products: products,
-          });
-        })
-        .catch((err) => console.log(err));
-    })
-    .catch((err) => console.log(err));
+export const getCart = async (req, res) => {
+  try {
+    const products = await req.user.getCart();
+    res.render("shop/cart", {
+      path: "/cart",
+      pageTitle: "Your Cart",
+      products: products,
+    });
+  } catch (err) {
+    console.error(err);
+    res.render("/");
+  }
 };
 
 export const postCart = async (req, res) => {
   const prodId = req.body.productId;
   const user = req.user;
 
-  const product = await Product.findById(prodId)
-  const result = await req.user.addToCart(product, user)
+  const product = await Product.findById(prodId);
+  const result = await req.user.addToCart(product, user);
 
   res.redirect("/cart");
 
@@ -103,21 +99,15 @@ export const postCart = async (req, res) => {
   //   .catch((err) => console.log(err));
 };
 
-export const postCartDeleteProduct = (req, res) => {
-  const prodId = req.body.productId;
-  req.user
-    .getCart()
-    .then((cart) => {
-      return cart.getProducts({ where: { id: prodId } });
-    })
-    .then((products) => {
-      const product = products[0];
-      return product.cartItem.destroy();
-    })
-    .then((result) => {
-      res.redirect("/cart");
-    })
-    .catch((err) => console.log(err));
+export const postCartDeleteProduct = async (req, res) => {
+  try {
+    const prodId = req.body.productId;
+    await req.user.deleteCardItem(prodId);
+    res.redirect("/cart");
+  } catch (err) {
+    console.error(err);
+    res.redirect("/cart");
+  }
 };
 
 export const postOrder = (req, res) => {

@@ -18,38 +18,80 @@ class User {
       throw new Error("Failed to save user to the database.");
     }
   }
-
   async addToCart(product, user) {
     try {
       const db = getDb();
-
-      const cart = user.cart
-      let quantity = 1;
-
-      if (cart?.items && cart.items.some((item) => item.productId.toString() === product._id.toString())) {
-        const existingItem = cart.items.find(
-          (item) => item.productId.toString() === product._id.toString()
-        );
-        
-        quantity = existingItem.quantity + 1;
-      }
-
-      const updatedCart = { items: [{ productId: product._id, quantity }] };
-
+  
+      const cart = user.cart || { items: [] }; // Initialize if cart is empty
+      const updatedCartItems = [...cart.items];
       
+      const cartProductIndex = cart.items.findIndex(
+        (item) => item.productId.toString() === product._id.toString()
+      );
+  
+      if (cartProductIndex >= 0) {
+        // Product already exists in the cart, update quantity
+        updatedCartItems[cartProductIndex].quantity += 1;
+      } else {
+        // New product, add to cart
+        updatedCartItems.push({ productId: product._id, quantity: 1 });
+      }
+  
+      const updatedCart = { items: updatedCartItems };
+  
       const result = await db
         .collection("users")
         .updateOne(
           { _id: new ObjectId(this._id) },
           { $set: { cart: updatedCart } }
         );
+        
       return result;
-
     } catch (err) {
       console.error(err);
       throw new Error("Failed to add product to the user's cart.");
     }
   }
+  
+
+  async getCart() {
+    try {
+      const db = getDb();
+      console.log("Getting Cart");
+      const productIds = this.cart.items.map((item) => item.productId);
+      const products = await db
+        .collection("products")
+        .find({ _id: { $in: productIds } })
+        .toArray();
+
+      const data = products.map((product) => ({
+        ...product,
+        quantity: this.cart.items.find(
+          (item) => item.productId.toString() === product._id.toString()
+        ).quantity,
+      }));
+      return data;
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  }
+  async deleteCardItem(productId) {
+    try {
+      const db = getDb();
+      const result = await db
+        .collection("users")
+        .updateOne(
+          { _id: new ObjectId(this._id) },
+          { $pull: { 'cart.items': { productId: new ObjectId(productId) } } }
+        );
+      return result;
+    } catch (err) {
+      console.error(err);
+      throw new Error("Failed to delete product from the user's cart.");
+    }
+  }
+  
 
   static async findById(id) {
     try {
