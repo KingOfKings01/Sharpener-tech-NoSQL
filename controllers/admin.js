@@ -13,7 +13,9 @@ export const postAddProduct = async (req, res) => {
   try {
     const { title, price, description, imageUrl } = req.body;
 
-    const product = new Product(title, price, description, imageUrl);
+    const userId = req.user._id
+
+    const product = new Product(title, price, description, imageUrl, null, userId);
 
     const result = await product.save();
 
@@ -55,12 +57,15 @@ export const postEditProduct = async (req, res) => {
   try {
     const { productId, title, price, imageUrl, description } = req.body;
 
+    const userId = req.user._id;
+
     const product = new Product(
       title,
       price,
       description,
       imageUrl,
-      new ObjectId(productId)
+      new ObjectId(productId),
+      userId
     );
 
     await product.save();
