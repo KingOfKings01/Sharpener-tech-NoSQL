@@ -15,54 +15,73 @@ const userSchema = new Schema({
   cart: {
     items: [
       {
-        productId: { type: Schema.Types.ObjectId, required:true, ref: "Product" },
-        quantity: { type: Number, required: true }
-      }
-    ]
-  }
-})
+        productId: {
+          type: Schema.Types.ObjectId,
+          required: true,
+          ref: "Product",
+        },
+        quantity: { type: Number, required: true },
+      },
+    ],
+  },
+});
 
-userSchema.methods.addToCart = async function(product){
+userSchema.methods.deleteCardItem = async function (product) {
   try {
+    const updatedCartItems = this.cart.items.filter(
+      (item) => item.productId.toString() !== product
+    );
 
-          console.log("object: " + product);
-    
-          const updatedCartItems = [...this.cart.items];
-    
-          const cartProductIndex = this.cart.items.findIndex(
-            (item) => item.productId.toString() === product._id.toString()
-          );
-    
-          if (cartProductIndex >= 0) {
-            // Product already exists in the cart, update quantity
-            updatedCartItems[cartProductIndex].quantity += 1;
-          } else {
-            // New product, add to cart
-            updatedCartItems.push({ productId: product._id, quantity: 1 });
-          }
-    
-          const updatedCart = { items: updatedCartItems };
+    this.cart.items = updatedCartItems
 
-          this.cart = updatedCart;
+    const result = this.save();
 
-          const result = this.save()
-          
-          // await db
-          //   .collection("users")
-          //   .updateOne(
-          //     { _id: new ObjectId(this._id) },
-          //     { $set: { cart: updatedCart } }
-          //   );
-    
-          return result;
-        } catch (err) {
-          console.error(err);
-          throw new Error("Failed to add product to the user's cart.");
-        }
-}
+    return result;
+  } catch (err) {
+    console.error(err);
+    throw new Error("Failed to delete product from the user's cart.");
+  }
+};
 
+userSchema.methods.addToCart = async function (product) {
+  try {
+    console.log("object: " + product);
 
-export default mongoose.model("User", userSchema);  
+    const updatedCartItems = [...this.cart.items];
+
+    const cartProductIndex = this.cart.items.findIndex(
+      (item) => item.productId.toString() === product._id.toString()
+    );
+
+    if (cartProductIndex >= 0) {
+      // Product already exists in the cart, update quantity
+      updatedCartItems[cartProductIndex].quantity += 1;
+    } else {
+      // New product, add to cart
+      updatedCartItems.push({ productId: product._id, quantity: 1 });
+    }
+
+    const updatedCart = { items: updatedCartItems };
+
+    this.cart = updatedCart;
+
+    const result = this.save();
+
+    // await db
+    //   .collection("users")
+    //   .updateOne(
+    //     { _id: new ObjectId(this._id) },
+    //     { $set: { cart: updatedCart } }
+    //   );
+
+    return result;
+  } catch (err) {
+    console.error(err);
+    throw new Error("Failed to add product to the user's cart.");
+  }
+};
+
+export default mongoose.model("User", userSchema);
 
 // import { ObjectId } from "mongodb";
 // import { getDb } from "../utils/database.js";
@@ -192,7 +211,7 @@ export default mongoose.model("User", userSchema);
 //         totalPrice: products.reduce((acc, product) => acc + product.price * product.quantity, 0)
 //       }
 //       const result = await db.collection("orders").insertOne(order)
-      
+
 //       // empty cart
 //       await db
 //         .collection("users")
@@ -210,7 +229,7 @@ export default mongoose.model("User", userSchema);
 //   async getOrders() {
 //     try {
 //       const db = getDb();
-      
+
 //       const orders = await db.collection('orders').find({"user._id":new ObjectId(this._id)}).toArray()
 //       // console.log(orders);
 //       return orders;
@@ -219,7 +238,7 @@ export default mongoose.model("User", userSchema);
 //       return [];
 //     }
 //   }
-  
+
 // }
 
 // export default User;

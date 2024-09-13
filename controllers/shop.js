@@ -47,7 +47,7 @@ export const getIndex = (req, res) => {
 export const getCart = async (req, res) => {
   try {
     const user = await req.user.populate("cart.items.productId");
-    // .execPopulate();
+    // .execPopulate(); //? not needed in my case!
 
     const products = user.cart.items;
 
@@ -74,6 +74,7 @@ export const postCart = async (req, res) => {
 
 export const postCartDeleteProduct = async (req, res) => {
   try {
+    console.log("Delete Product from Cart");
     const prodId = req.body.productId;
     await req.user.deleteCardItem(prodId);
     res.redirect("/cart");
