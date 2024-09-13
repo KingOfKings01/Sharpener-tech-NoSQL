@@ -31,7 +31,7 @@ app.use(bodyParser.json())
 app.use((req, res, next) => {
     User.findById('66e361bf667fdcb21585244d')
       .then(user => {
-        req.user = new User(user.name, user.email, user.cart, user._id);
+        req.user = new User(user.name, user.email, user.cart, user.orders, user._id);
         next();
       })
       .catch(err => console.log(err));
