@@ -30,7 +30,7 @@ export const postAddProduct = async (req, res) => {
   try {
     const { title, price, description, imageUrl } = req.body;
 
-    const product = new Product({ title, price, description, imageUrl });
+    const product = new Product({ title, price, description, imageUrl, userId: req.user._id});
 
     const result = await product.save();
     console.log("Product saved");
