@@ -23,7 +23,7 @@ export const getProduct = async (req, res) => {
       product: product,
       pageTitle: product.title,
       path: "/products",
-    }); 
+    });
   } catch (err) {
     console.error(err);
     res.redirect("/");
@@ -46,7 +46,11 @@ export const getIndex = (req, res) => {
 
 export const getCart = async (req, res) => {
   try {
-    const products = await req.user.getCart();
+    const user = await req.user.populate("cart.items.productId");
+    // .execPopulate();
+
+    const products = user.cart.items;
+
     res.render("shop/cart", {
       path: "/cart",
       pageTitle: "Your Cart",
@@ -54,7 +58,7 @@ export const getCart = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.render("/");
+    res.render("/products");
   }
 };
 
@@ -63,7 +67,7 @@ export const postCart = async (req, res) => {
   const user = req.user;
 
   const product = await Product.findById(prodId);
-  const result = await req.user.addToCart(product, user);
+  const result = await req.user.addToCart(product);
 
   res.redirect("/cart");
 };

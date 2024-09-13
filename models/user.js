@@ -22,6 +22,46 @@ const userSchema = new Schema({
   }
 })
 
+userSchema.methods.addToCart = async function(product){
+  try {
+
+          console.log("object: " + product);
+    
+          const updatedCartItems = [...this.cart.items];
+    
+          const cartProductIndex = this.cart.items.findIndex(
+            (item) => item.productId.toString() === product._id.toString()
+          );
+    
+          if (cartProductIndex >= 0) {
+            // Product already exists in the cart, update quantity
+            updatedCartItems[cartProductIndex].quantity += 1;
+          } else {
+            // New product, add to cart
+            updatedCartItems.push({ productId: product._id, quantity: 1 });
+          }
+    
+          const updatedCart = { items: updatedCartItems };
+
+          this.cart = updatedCart;
+
+          const result = this.save()
+          
+          // await db
+          //   .collection("users")
+          //   .updateOne(
+          //     { _id: new ObjectId(this._id) },
+          //     { $set: { cart: updatedCart } }
+          //   );
+    
+          return result;
+        } catch (err) {
+          console.error(err);
+          throw new Error("Failed to add product to the user's cart.");
+        }
+}
+
+
 export default mongoose.model("User", userSchema);  
 
 // import { ObjectId } from "mongodb";
