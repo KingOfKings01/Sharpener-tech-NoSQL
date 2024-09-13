@@ -24,6 +24,20 @@ const userSchema = new Schema({
       },
     ],
   },
+
+  orders: {
+    type: [
+      {
+        productId: {
+          type: Schema.Types.ObjectId,
+          required: true,
+          ref: "Product",
+        },
+        quantity: { type: Number, required: true },
+        orderDate: { type: Date, default: Date.now },
+      },
+    ],
+  }
 });
 
 userSchema.methods.deleteCardItem = async function (product) {
@@ -45,7 +59,6 @@ userSchema.methods.deleteCardItem = async function (product) {
 
 userSchema.methods.addToCart = async function (product) {
   try {
-    console.log("object: " + product);
 
     const updatedCartItems = [...this.cart.items];
 
@@ -67,19 +80,26 @@ userSchema.methods.addToCart = async function (product) {
 
     const result = this.save();
 
-    // await db
-    //   .collection("users")
-    //   .updateOne(
-    //     { _id: new ObjectId(this._id) },
-    //     { $set: { cart: updatedCart } }
-    //   );
-
     return result;
   } catch (err) {
     console.error(err);
     throw new Error("Failed to add product to the user's cart.");
   }
 };
+
+
+userSchema.methods.clearCart = async function(){
+        try { 
+          // empty cart
+          this.cart = { items: [] }
+          
+          this.save()
+    
+        } catch (err) {
+          console.error(err);
+          throw new Error("Failed to place order for the user.");
+        }
+}
 
 export default mongoose.model("User", userSchema);
 
