@@ -1,75 +1,88 @@
-import { ObjectId } from "mongodb";
-import { getDb } from "../utils/database.js";
+import mongoose from "mongoose";
 
-class Product {
-  constructor(title, price, description, imageUrl, id, userId) {
-    this.title = title;
-    this.price = price;
-    this.description = description;
-    this.imageUrl = imageUrl;
-    this._id = id ? new ObjectId(id) : null;
-    this.userId = userId;
-  }
+const Schema = mongoose.Schema;
 
-  async save() {
-    // Implement saving the product to the database
-    try {
-      const db = getDb();
+const productSchema = new Schema({
+  title: { type: String, required: true },
+  price: { type: Number, required: true },
+  description: { type: String, required: true },
+  imageUrl: { type: String, required: true },
+});
 
-      // If the product already exists, update it instead of creating a new one
-      if (this._id) {
-        console.log(`Update product: ${this.title}`);
-        const result = await db
-          .collection("products")
-          .updateOne({ _id: new ObjectId(this._id) }, { $set: this });
-        return result;
-      }
+export default mongoose.model("Product", productSchema);  
 
-      console.log(`Saving product: ${this.title}`);
-      const result = await db.collection("products").insertOne(this);
+// import { ObjectId } from "mongodb";
+// import { getDb } from "../utils/database.js";
 
-      return result;
-    } catch (err) {
-      console.error(err.message);
-    }
-  }
+// class Product {
+//   constructor(title, price, description, imageUrl, id, userId) {
+//     this.title = title;
+//     this.price = price;
+//     this.description = description;
+//     this.imageUrl = imageUrl;
+//     this._id = id ? new ObjectId(id) : null;
+//     this.userId = userId;
+//   }
 
-  static async findAll() {
-    try {
-      const db = getDb();
-      const products = await db.collection("products").find().toArray(); //! Not recommended
-      return products;
-    } catch (error) {
-      console.error(error.message);
-      return [];
-    }
-  }
+//   async save() {
+//     // Implement saving the product to the database
+//     try {
+//       const db = getDb();
 
-  static async findById(prodId) {
-    try {
-      const db = getDb();
-      const product = await db
-        .collection("products")
-        .findOne({ _id: new ObjectId(prodId) });
-      console.log("Product: ", product);
-      return product;
-    } catch (err) {
-      console.error(err.message);
-      throw new Error(err.message);
-    }
-  }
+//       // If the product already exists, update it instead of creating a new one
+//       if (this._id) {
+//         console.log(`Update product: ${this.title}`);
+//         const result = await db
+//           .collection("products")
+//           .updateOne({ _id: new ObjectId(this._id) }, { $set: this });
+//         return result;
+//       }
 
-  static async delete(prodId){
-    try{
-      const db = getDb();
-      const result = await db.collection("products").deleteOne({_id: new ObjectId(prodId)});
-      console.log(`Deleted product: ${prodId}`);
-      return result;
-    } catch(err){
-      console.error(err.message);
-      throw new Error(err.message);
-    }
-  }
-}
+//       console.log(`Saving product: ${this.title}`);
+//       const result = await db.collection("products").insertOne(this);
 
-export default Product;
+//       return result;
+//     } catch (err) {
+//       console.error(err.message);
+//     }
+//   }
+
+//   static async findAll() {
+//     try {
+//       const db = getDb();
+//       const products = await db.collection("products").find().toArray(); //! Not recommended
+//       return products;
+//     } catch (error) {
+//       console.error(error.message);
+//       return [];
+//     }
+//   }
+
+//   static async findById(prodId) {
+//     try {
+//       const db = getDb();
+//       const product = await db
+//         .collection("products")
+//         .findOne({ _id: new ObjectId(prodId) });
+//       console.log("Product: ", product);
+//       return product;
+//     } catch (err) {
+//       console.error(err.message);
+//       throw new Error(err.message);
+//     }
+//   }
+
+//   static async delete(prodId){
+//     try{
+//       const db = getDb();
+//       const result = await db.collection("products").deleteOne({_id: new ObjectId(prodId)});
+//       console.log(`Deleted product: ${prodId}`);
+//       return result;
+//     } catch(err){
+//       console.error(err.message);
+//       throw new Error(err.message);
+//     }
+//   }
+// }
+
+// export default Product;

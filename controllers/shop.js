@@ -2,7 +2,7 @@ import Product from "../models/product.js";
 
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.findAll();
+    const products = await Product.find();
 
     res.render("shop/product-list", {
       prods: products,
@@ -23,7 +23,7 @@ export const getProduct = async (req, res) => {
       product: product,
       pageTitle: product.title,
       path: "/products",
-    });
+    }); 
   } catch (err) {
     console.error(err);
     res.redirect("/");
@@ -31,7 +31,7 @@ export const getProduct = async (req, res) => {
 };
 
 export const getIndex = (req, res) => {
-  Product.findAll()
+  Product.find()
     .then((products) => {
       res.render("shop/index", {
         prods: products,
@@ -93,8 +93,6 @@ export const postOrder = async (req, res) => {
 export const getOrders = async (req, res) => {
   try {
     const orders = await req.user.getOrders();
-    
-    console.log(orders);
 
     res.render("shop/orders", {
       path: "/orders",
